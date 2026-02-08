@@ -171,6 +171,81 @@ State change 10 -> 11  (→ streaming ✅)
 
 ---
 
+## Device Address Map (DUML Subsystem IDs)
+
+| ID | Device | Description |
+|----|--------|-------------|
+| 0x00 | Invalid/Any | Broadcast |
+| 0x01 | Camera | Ambarella SoC |
+| 0x02 | App | Mobile app / BLE client |
+| 0x03 | Flight Controller | FC |
+| 0x04 | **Gimbal** | Gimbal MCU |
+| 0x05 | Center Board | — |
+| 0x06 | Remote Control | RC |
+| 0x07 | Wi-Fi | Wi-Fi subsystem |
+| 0x08 | DM36x | Transcoder |
+
+---
+
+## Gimbal Control (CmdSet 0x04)
+
+The gimbal is addressed as device `0x04`. To send commands from the App, use target `0x0402` (App→Gimbal, wire bytes `02 04`).
+
+### Gimbal Command IDs
+
+| CmdId | Name | Direction | Payload | Description |
+|-------|------|-----------|---------|-------------|
+| 0x01 | Gimbal Control | App→Gimbal | 3× uint16 LE (range 363..1685) | PWM-style control, center=1024 |
+| 0x02 | Get Position | App→Gimbal | (empty) | Request current position |
+| 0x05 | **Params/Push Position** | Gimbal→App | ≥12B | **Telemetry**: pitch/roll/yaw + mode + flags (~20Hz) |
+| 0x0A | **Ext Ctrl Degree (Angle Set)** | App→Gimbal | 10B | Set absolute angle target |
+| 0x0B | Ext Ctrl Status | App→Gimbal | (empty) | Query control status |
+| 0x0C | **Ext Ctrl Accel (Speed)** | App→Gimbal | 7B | Set angular velocity |
+| 0x0D | Suspend/Resume | App→Gimbal | uint16 LE | 0x2AB5=Resume, 0x7EF2=Suspend |
+| 0x14 | **Abs Angle Control** | App→Gimbal | 8B | Absolute angle with duration |
+| 0x15 | **Movement** | App→Gimbal | 20B | Incremental movement (int8 steps) |
+| 0x1C | Type Get | App→Gimbal | — | Query gimbal type |
+| 0x39 | Lock | App→Gimbal | — | Lock gimbal position |
+| 0x3A | Rotate Camera X Axis | App→Gimbal | — | Rotate 90°/180° |
+| 0x4C | **Reset And Set Mode** | App→Gimbal | 2B | Mode: 0=lock, 1=follow, 2=FPV |
+
+### Gimbal Telemetry Payload (0x05 — Push Position)
+
+```
+Offset  Type     Field              Unit          Range
+0       int16 LE Pitch              ×0.1 degree   -900..470 (zero=forward)
+2       int16 LE Roll               ×0.1 degree   -410..410 (zero=level)
+4       int16 LE Yaw                ×0.1 degree   -1460..-540 (-1000=forward)
+6       uint8    Mode/Flags         —             bit5=sub_mode, bit6-7=mode
+7       int8     Roll Adjust        —             —
+8       uint16   Yaw Angle/Joystick —             bit0-1=ver_dir, bit2-3=hor_dir
+10      uint8    Limit Flags        —             bit0=pitch, bit1=roll, bit2=yaw
+11      uint8    Version/Click      —             bit5=double, bit6=triple, bit7=single
+```
+
+### Gimbal Speed Control Payload (0x0C)
+
+```
+[int16 LE: pitch_speed] [int16 LE: roll_speed] [int16 LE: yaw_speed] [uint8: flags]
+```
+All speed values in degrees × 10, range -1800..1800. Flags bit0 = enable.
+
+### Gimbal Angle Set Payload (0x0A)
+
+```
+[int16 LE: pitch] [int16 LE: roll] [int16 LE: yaw] [int16 LE: speed×100] [uint8: flags] [uint8: speed/2000]
+```
+Angles in degrees × 10, range -1800..1800.
+
+### Gimbal Abs Angle Control Payload (0x14)
+
+```
+[int16 LE: pitch] [int16 LE: roll] [int16 LE: yaw] [uint8: flags] [uint8: duration]
+```
+Angles in degrees × 10. Flags: bit0=pitch, bit1=roll, bit2=yaw (which axes to control). Duration unit TBD.
+
+---
+
 ## Message Type Reference
 
 ### Control Messages (App → Device)
@@ -289,6 +364,12 @@ noble.on('discover', (p) => {
 ### Message Sniffer
 ```bash
 npx tsx tools/message-sniffer.ts <device-id> <model>
+```
+
+### Gimbal Control (Interactive)
+```bash
+node tools/gimbal-control.mjs <device-id> [pin]
+# Arrow keys / WASD = tilt/pan, R = recenter, 1-5 = switch method, +/- = speed
 ```
 
 ---

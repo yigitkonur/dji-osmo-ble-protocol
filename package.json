@@ -1,0 +1,35 @@
+{
+  "name": "dji-osmo-ble-protocol",
+  "version": "1.0.0",
+  "description": "> **Successfully achieved**: Full BLE pairing → WiFi configuration → RTMP livestream initiation on a DJI Osmo Pocket 3, entirely from the command line on macOS, without the DJI Mimo app.",
+  "main": "src/connection.mjs",
+  "exports": {
+    ".": "./src/connection.mjs",
+    "./protocol": "./src/protocol/duml.mjs",
+    "./constants": "./src/protocol/constants.mjs",
+    "./transport": "./src/transport/ble.mjs",
+    "./gimbal": "./src/controllers/gimbal.mjs"
+  },
+  "bin": {
+    "dji-osmo": "src/cli/index.mjs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yigitkonur/dji-osmo-ble-protocol.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/yigitkonur/dji-osmo-ble-protocol/issues"
+  },
+  "homepage": "https://github.com/yigitkonur/dji-osmo-ble-protocol#readme",
+  "dependencies": {
+    "@stoprocent/noble": "^2.3.10",
+    "crc-full": "^1.1.0"
+  }
+}

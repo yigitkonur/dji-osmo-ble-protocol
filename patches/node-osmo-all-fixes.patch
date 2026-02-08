@@ -475,54 +475,257 @@ index 0000000..f7c6baa
 +};
 +
 +const HELP = `
-+  dji-osmo — Control DJI Osmo cameras via Bluetooth
++╔════════════════════════════════════════════════════════════════════════════╗
++║                        DJI OSMO CLI — HELP GUIDE                           ║
++╚════════════════════════════════════════════════════════════════════════════╝
 +
-+  Usage:
-+    dji-osmo scan [--timeout <seconds>]
-+    dji-osmo stream <device-id> --ssid <wifi> --password <pass> --rtmp <url> [options]
-+    dji-osmo pair <device-id> [--pin <code>]
-+    dji-osmo info <device-id> [--duration <seconds>]
++  A comprehensive CLI for controlling DJI Osmo cameras via Bluetooth and
++  converting video footage with professional color grading.
 +
-+  Commands:
-+    scan        Scan for nearby DJI Osmo devices
-+    stream      Start RTMP livestreaming via BLE → WiFi → RTMP
-+    pair        Pair with a device (without streaming)
-+    info        Connect and show live device telemetry
++┌─ QUICK START ────────────────────────────────────────────────────────────┐
++│                                                                            │
++│  1. Find your device:                                                      │
++│     $ dji-osmo scan                                                        │
++│                                                                            │
++│  2. Pair with device (first time only):                                    │
++│     $ dji-osmo pair <device-id>                                            │
++│                                                                            │
++│  3. Start livestreaming:                                                   │
++│     $ dji-osmo stream <device-id> -s WiFi -p pass --rtmp rtmp://url       │
++│                                                                            │
++│  4. Convert D-Log-M footage to Rec.709:                                    │
++│     $ dji-osmo convert video.mp4                                           │
++│                                                                            │
++└────────────────────────────────────────────────────────────────────────────┘
 +
-+  Stream Options:
-+    --ssid, -s          WiFi network name (required)
-+    --password, -p      WiFi password (required)
-+    --rtmp, -r          RTMP URL (required)
-+    --resolution        Video resolution: 480p, 720p, 1080p (default: 1080p)
-+    --fps               Frame rate: 25, 30 (default: 30)
-+    --bitrate           Bitrate in kbps (default: 6000)
-+    --stabilization     Off, RockSteady, RockSteady+, HorizonBalancing, HorizonSteady
-+    --pin               Pairing PIN code (default: 5160)
-+    --model, -m         Device model: pocket3, action3, action4, action5pro (default: pocket3)
++┌─ COMMANDS ───────────────────────────────────────────────────────────────┐
++│                                                                            │
++│  scan                                                                      │
++│    Discover nearby DJI Osmo devices via Bluetooth Low Energy.             │
++│    Returns device names, IDs, and signal strength (RSSI).                 │
++│                                                                            │
++│    Usage: dji-osmo scan [--timeout <seconds>]                             │
++│                                                                            │
++│    Options:                                                                │
++│      -t, --timeout <seconds>    Scan duration (default: 10)               │
++│      -v, --verbose              Show detailed BLE debug output            │
++│                                                                            │
++│    Example:                                                                │
++│      $ dji-osmo scan --timeout 15                                          │
++│                                                                            │
++│  ─────────────────────────────────────────────────────────────────────    │
++│                                                                            │
++│  pair                                                                      │
++│    Pair with a DJI Osmo device using a PIN code. Required before first    │
++│    stream. The device will show a pairing prompt on screen that you       │
++│    must accept.                                                            │
++│                                                                            │
++│    Usage: dji-osmo pair <device-id> [--pin <code>] [--model <model>]      │
++│                                                                            │
++│    Arguments:                                                              │
++│      <device-id>                Device ID from scan command               │
++│                                                                            │
++│    Options:                                                                │
++│      --pin <code>               Pairing PIN code (default: 5160)          │
++│      -m, --model <model>        Device model (default: pocket3)           │
++│                                 Options: pocket3, action3, action4,        │
++│                                          action5pro                        │
++│      -v, --verbose              Show detailed BLE debug output            │
++│                                                                            │
++│    Example:                                                                │
++│      $ dji-osmo pair abc123def456 --pin 5160                               │
++│                                                                            │
++│  ─────────────────────────────────────────────────────────────────────    │
++│                                                                            │
++│  stream                                                                    │
++│    Start RTMP livestreaming. Device connects to WiFi, then streams        │
++│    video to your RTMP server. Flow: BLE → WiFi Config → RTMP Stream       │
++│                                                                            │
++│    Usage: dji-osmo stream <device-id> -s <ssid> -p <pass> --rtmp <url>    │
++│                              [--resolution <res>] [--fps <fps>] [...]     │
++│                                                                            │
++│    Arguments:                                                              │
++│      <device-id>                Device ID from scan command               │
++│                                                                            │
++│    Required Options:                                                       │
++│      -s, --ssid <name>          WiFi network name (2.4GHz recommended)    │
++│      -p, --password <pass>      WiFi password                             │
++│      -r, --rtmp <url>           RTMP URL (e.g., rtmp://server/live/key)   │
++│                                                                            │
++│    Optional Video Settings:                                                │
++│      --resolution <res>         Video resolution (default: 1080p)         │
++│                                 Options: 480p, 720p, 1080p                 │
++│      --fps <rate>               Frame rate (default: 30)                  │
++│                                 Options: 25, 30                            │
++│      --bitrate <kbps>           Video bitrate in kbps (default: 6000)     │
++│      --stabilization <mode>     Image stabilization mode                  │
++│                                 Options: Off, RockSteady, RockSteady+,     │
++│                                          HorizonBalancing, HorizonSteady   │
++│                                 (default: RockSteady+)                     │
++│                                                                            │
++│    Optional Device Settings:                                               │
++│      --pin <code>               Pairing PIN if not paired (default: 5160) │
++│      -m, --model <model>        Device model (default: pocket3)           │
++│      -v, --verbose              Show detailed BLE debug output            │
++│                                                                            │
++│    Examples:                                                               │
++│      $ dji-osmo stream abc123 -s MyWiFi -p secret \\                       │
++│          --rtmp rtmp://live.twitch.tv/app/stream_key                       │
++│                                                                            │
++│      $ dji-osmo stream abc123 -s MyWiFi -p secret \\                       │
++│          --rtmp rtmp://a.rtmp.youtube.com/live2/key \\                     │
++│          --resolution 720p --fps 30 --bitrate 4500                         │
++│                                                                            │
++│  ─────────────────────────────────────────────────────────────────────    │
++│                                                                            │
++│  info                                                                      │
++│    Connect to device and collect live telemetry data including battery    │
++│    level, gimbal status, IMU data, and recording status. Useful for       │
++│    debugging and monitoring device health.                                 │
++│                                                                            │
++│    Usage: dji-osmo info <device-id> [--duration <seconds>] [--model <m>]  │
++│                                                                            │
++│    Arguments:                                                              │
++│      <device-id>                Device ID from scan command               │
++│                                                                            │
++│    Options:                                                                │
++│      -d, --duration <seconds>   Collection time (default: 15)             │
++│      -m, --model <model>        Device model (default: pocket3)           │
++│      -v, --verbose              Show detailed BLE debug output            │
++│                                                                            │
++│    Example:                                                                │
++│      $ dji-osmo info abc123def456 --duration 30                            │
++│                                                                            │
++│  ─────────────────────────────────────────────────────────────────────    │
++│                                                                            │
++│  convert                                                                   │
++│    Convert DJI video files by applying a 3D LUT for color grading.        │
++│    Automatically downloads DJI's official D-Log-M to Rec.709 LUT, or      │
++│    use your own custom LUT. Supports single files or batch processing     │
++│    entire directories. Preserves original frame rate and audio.           │
++│                                                                            │
++│    Usage: dji-osmo convert <file-or-directory> [--lut <file>] [-o <dir>]  │
++│                                                                            │
++│    Arguments:                                                              │
++│      <file-or-directory>        Video file or folder to convert           │
++│                                 Supported: .mp4, .mov, .mkv, .avi,         │
++│                                            .mxf, .webm                     │
++│                                                                            │
++│    Options:                                                                │
++│      -l, --lut <file>           Custom LUT file (.cube format)            │
++│                                 If omitted, uses DJI D-Log-M to Rec.709   │
++│      -o, --output <dir>         Output directory                          │
++│                                 (default: ./converted)                     │
++│                                                                            │
++│    Conversion Details:                                                     │
++│      • Codec: H.264 (libx264)                                              │
++│      • Quality: CRF 20 (high quality, ~6-8 Mbps for 1080p)                │
++│      • Preset: medium (balanced speed/quality)                             │
++│      • Audio: Copied without re-encoding (lossless)                        │
++│      • Frame rate: Auto-detected from source                               │
++│      • Skips already-converted files automatically                         │
++│                                                                            │
++│    Examples:                                                               │
++│      # Convert single file with DJI LUT                                    │
++│      $ dji-osmo convert DJI_0001.mp4                                       │
++│                                                                            │
++│      # Batch convert entire folder                                         │
++│      $ dji-osmo convert /Volumes/SD_CARD/DCIM/100MEDIA/                    │
++│                                                                            │
++│      # Use custom LUT and output directory                                 │
++│      $ dji-osmo convert video.mp4 -l custom.cube -o /exports               │
++│                                                                            │
++└────────────────────────────────────────────────────────────────────────────┘
 +
-+  Scan Options:
-+    --timeout, -t       Scan duration in seconds (default: 10)
++┌─ TROUBLESHOOTING ────────────────────────────────────────────────────────┐
++│                                                                            │
++│  Device not found during scan?                                             │
++│    • Ensure Bluetooth is enabled on your Mac                               │
++│    • Make sure device is powered on and not sleeping                       │
++│    • Try turning device screen on                                          │
++│    • Increase scan timeout: --timeout 20                                   │
++│    • Reset Bluetooth: blueutil --power 0 && blueutil --power 1            │
++│                                                                            │
++│  Pairing fails or times out?                                               │
++│    • Device screen must be on during pairing                               │
++│    • Accept the pairing prompt on device screen immediately                │
++│    • Try unpair/forget device on camera, then pair again                   │
++│    • Verify PIN code (default is 5160)                                     │
++│                                                                            │
++│  Stream fails to start?                                                    │
++│    • Ensure device is paired first: dji-osmo pair <id>                     │
++│    • WiFi must be 2.4GHz (5GHz may not work on some models)                │
++│    • Check WiFi password is correct                                        │
++│    • Verify RTMP URL is valid and server is reachable                      │
++│    • Test RTMP URL with OBS or FFmpeg first                                │
++│                                                                            │
++│  Conversion fails?                                                         │
++│    • Install FFmpeg: brew install ffmpeg                                   │
++│    • Verify input file is not corrupted: ffmpeg -i video.mp4               │
++│    • Check disk space in output directory                                  │
++│    • Ensure LUT file exists and is valid .cube format                      │
++│                                                                            │
++│  Get verbose output for debugging:                                         │
++│    Add -v or --verbose flag to any command                                 │
++│      $ dji-osmo scan -v                                                    │
++│      $ dji-osmo stream abc123 -s WiFi -p pass --rtmp url -v               │
++│                                                                            │
++└────────────────────────────────────────────────────────────────────────────┘
 +
-+  Global Options:
-+    --verbose, -v       Show detailed BLE debug output
++┌─ REQUIREMENTS ───────────────────────────────────────────────────────────┐
++│                                                                            │
++│  System:                                                                   │
++│    • macOS with Bluetooth LE support                                       │
++│    • Node.js 18+ (for BLE commands)                                        │
++│    • FFmpeg (for convert command): brew install ffmpeg                     │
++│                                                                            │
++│  Supported Devices:                                                        │
++│    • DJI Osmo Pocket 3 (tested, fully supported)                           │
++│    • DJI Osmo Action 3 (experimental)                                      │
++│    • DJI Osmo Action 4 (experimental)                                      │
++│    • DJI Osmo Action 5 Pro (experimental)                                  │
++│                                                                            │
++│  Network:                                                                  │
++│    • 2.4GHz WiFi network (5GHz may not work on all devices)                │
++│    • RTMP server (Twitch, YouTube Live, custom server, etc.)               │
++│                                                                            │
++└────────────────────────────────────────────────────────────────────────────┘
 +
-+  Info Options:
-+    --duration, -d      How long to collect telemetry in seconds (default: 15)
-+    --model, -m         Device model (default: pocket3)
++┌─ STREAMING SERVICES ─────────────────────────────────────────────────────┐
++│                                                                            │
++│  Twitch:                                                                   │
++│    RTMP URL: rtmp://live.twitch.tv/app/<stream-key>                        │
++│    Get key: https://dashboard.twitch.tv/settings/stream                    │
++│                                                                            │
++│  YouTube:                                                                  │
++│    RTMP URL: rtmp://a.rtmp.youtube.com/live2/<stream-key>                  │
++│    Get key: https://studio.youtube.com/ → Go Live → Stream Key            │
++│                                                                            │
++│  Facebook:                                                                 │
++│    RTMP URL: rtmps://live-api-s.facebook.com:443/rtmp/<stream-key>         │
++│    Get key: https://www.facebook.com/live/producer                         │
++│                                                                            │
++│  Custom RTMP Server:                                                       │
++│    Use nginx-rtmp-module or similar                                        │
++│    URL format: rtmp://<server-ip>/<app>/<stream-key>                       │
++│                                                                            │
++└────────────────────────────────────────────────────────────────────────────┘
 +
-+  Pair Options:
-+    --pin               Pairing PIN code (default: 5160)
-+    --model, -m         Device model (default: pocket3)
++┌─ LINKS & RESOURCES ──────────────────────────────────────────────────────┐
++│                                                                            │
++│  Documentation:                                                            │
++│    • Protocol spec: PROTOCOL.md in repository                              │
++│    • GitHub: github.com/yigitkonur/dji-osmo-ble-protocol                   │
++│                                                                            │
++│  Tools:                                                                    │
++│    • FFmpeg: ffmpeg.org                                                    │
++│    • LUT resources: luts.iwltbap.com, freepresets.com                      │
++│                                                                            │
++└────────────────────────────────────────────────────────────────────────────┘
 +
-+  Examples:
-+    dji-osmo scan
-+    dji-osmo stream abc123 -s MyWiFi -p secret --rtmp rtmp://server/live/key
-+    dji-osmo pair abc123
-+    dji-osmo info abc123
++  For more help: dji-osmo <command> --help
++  Report issues: github.com/yigitkonur/dji-osmo-ble-protocol/issues
 +
-+  Environment:
-+    Requires macOS with Bluetooth enabled.
-+    Install blueutil for BLE reset: brew install blueutil
 +`;
 +
 +// ─── Argument Parser ─────────────────────────────────────────────────
@@ -545,7 +748,7 @@ index 0000000..f7c6baa
 +        flags[key] = true;
 +      }
 +    } else if (arg.startsWith('-') && arg.length === 2) {
-+      const shortMap = { s: 'ssid', p: 'password', r: 'rtmp', t: 'timeout', m: 'model', d: 'duration' };
++      const shortMap = { s: 'ssid', p: 'password', r: 'rtmp', t: 'timeout', m: 'model', d: 'duration', l: 'lut', o: 'output' };
 +      const key = shortMap[arg[1]] || arg[1];
 +      const next = args[i + 1];
 +      if (next && !next.startsWith('-')) {
@@ -603,6 +806,110 @@ index 0000000..f7c6baa
 +
 +function warn(msg) {
 +  console.log(`\x1b[33m⚠\x1b[0m ${msg}`);
++}
++
++// ─── Video Conversion Helpers ────────────────────────────────────────
++
++import { execSync, spawn } from 'child_process';
++import { existsSync, mkdirSync, readdirSync, statSync } from 'fs';
++import { join, dirname, basename } from 'path';
++import { createWriteStream } from 'fs';
++import https from 'https';
++
++async function downloadDjiLut() {
++  const lutFilename = 'DJI_DLogM_to_Rec709.cube';
++  const lutPath = join(process.cwd(), lutFilename);
++
++  if (existsSync(lutPath)) {
++    return lutPath;
++  }
++
++  info('Downloading DJI D-Log-M to Rec.709 LUT...');
++  const lutUrl = 'https://www-dl.djicdn.com/5e45168b46b342d5b88f72c458ba6e79/OP3%20LUT%E6%96%87%E4%BB%B6%E7%89%B9%E6%AE%8A%E5%A4%84%E7%90%86/DJI%20OSMO%20Pocket%203%20D-Log%20M%20to%20Rec.709%20V1.cube';
++
++  return new Promise((resolve, reject) => {
++    https.get(lutUrl, (response) => {
++      if (response.statusCode !== 200) {
++        reject(new Error(`Failed to download LUT: ${response.statusCode}`));
++        return;
++      }
++      const file = createWriteStream(lutPath);
++      response.pipe(file);
++      file.on('finish', () => {
++        file.close();
++        success('LUT downloaded successfully');
++        resolve(lutPath);
++      });
++    }).on('error', (err) => {
++      reject(err);
++    });
++  });
++}
++
++function getVideoFps(videoPath) {
++  try {
++    const result = execSync(
++      `ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of json "${videoPath}"`,
++      { encoding: 'utf-8' }
++    );
++    const data = JSON.parse(result);
++    const fpsStr = data.streams[0].r_frame_rate;
++    const [num, den] = fpsStr.split('/').map(Number);
++    return Math.round((num / den) * 100) / 100;
++  } catch (err) {
++    warn(`Unable to detect FPS, defaulting to 30: ${err.message}`);
++    return 30.0;
++  }
++}
++
++function runFfmpeg(inputPath, outputPath, lutPath) {
++  return new Promise((resolve, reject) => {
++    const fps = getVideoFps(inputPath);
++    const lutFfmpegPath = lutPath.replace(/\\/g, '/').replace(':', '\\\\:');
++
++    const args = [
++      '-y',
++      '-fflags', '+genpts',
++      '-i', inputPath,
++      '-vf', `lut3d=${lutFfmpegPath}`,
++      '-r', String(fps),
++      '-vsync', 'cfr',
++      '-c:v', 'libx264',
++      '-crf', '20',
++      '-preset', 'medium',
++      '-pix_fmt', 'yuv420p',
++      '-profile:v', 'high',
++      '-level', '4.1',
++      '-c:a', 'copy',
++      outputPath
++    ];
++
++    const ffmpeg = spawn('ffmpeg', args);
++    let lastProgress = '';
++
++    ffmpeg.stderr.on('data', (data) => {
++      const str = data.toString();
++      // Extract time progress for display
++      const timeMatch = str.match(/time=(\d+:\d+:\d+\.\d+)/);
++      if (timeMatch && timeMatch[1] !== lastProgress) {
++        lastProgress = timeMatch[1];
++        process.stdout.write(`\r    Converting... ${lastProgress}`);
++      }
++    });
++
++    ffmpeg.on('close', (code) => {
++      process.stdout.write('\r');
++      if (code === 0) {
++        resolve();
++      } else {
++        reject(new Error(`FFmpeg exited with code ${code}`));
++      }
++    });
++
++    ffmpeg.on('error', (err) => {
++      reject(err);
++    });
++  });
 +}
 +
 +// ─── Commands ────────────────────────────────────────────────────────
@@ -923,6 +1230,116 @@ index 0000000..f7c6baa
 +  process.exit(0);
 +}
 +
++async function cmdConvert(positional, flags) {
++  const inputPath = positional[0];
++  if (!inputPath) die('Missing input path. Usage: dji-osmo convert <file-or-directory>');
++
++  if (!existsSync(inputPath)) die(`Path not found: ${inputPath}`);
++
++  // Get LUT path
++  let lutPath;
++  if (flags.lut) {
++    lutPath = flags.lut;
++    if (!existsSync(lutPath)) die(`LUT file not found: ${lutPath}`);
++    info(`Using custom LUT: ${lutPath}`);
++  } else {
++    try {
++      lutPath = await downloadDjiLut();
++      info('Using DJI D-Log-M to Rec.709 LUT');
++    } catch (err) {
++      die(`Failed to download LUT: ${err.message}`);
++    }
++  }
++
++  const stats = statSync(inputPath);
++
++  if (stats.isFile()) {
++    // Single file conversion
++    await convertSingleFile(inputPath, lutPath, flags.output);
++  } else if (stats.isDirectory()) {
++    // Batch directory conversion
++    await convertDirectory(inputPath, lutPath, flags.output);
++  } else {
++    die('Input path must be a file or directory');
++  }
++}
++
++async function convertSingleFile(inputPath, lutPath, outputDir) {
++  const inputDir = dirname(inputPath) || '.';
++  const filename = basename(inputPath);
++  const outDir = outputDir || join(inputDir, 'converted');
++
++  mkdirSync(outDir, { recursive: true });
++  const outputPath = join(outDir, filename);
++
++  if (existsSync(outputPath)) {
++    warn(`Output file already exists, skipping: ${filename}`);
++    console.log(`📁 Location: ${outputPath}`);
++    return;
++  }
++
++  try {
++    console.log(`\n🎥 Converting: ${filename}`);
++    await runFfmpeg(inputPath, outputPath, lutPath);
++    success(`Done: ${filename}`);
++    console.log(`📁 Saved to: ${outputPath}\n`);
++  } catch (err) {
++    die(`Conversion failed: ${err.message}`);
++  }
++}
++
++async function convertDirectory(inputDir, lutPath, outputDir) {
++  const outDir = outputDir || join(inputDir, 'converted');
++  mkdirSync(outDir, { recursive: true });
++
++  const videoExts = ['.mp4', '.mov', '.mkv', '.avi', '.mxf', '.webm'];
++  const files = readdirSync(inputDir).filter(f => {
++    if (f.startsWith('.')) return false;
++    const ext = f.toLowerCase().slice(f.lastIndexOf('.'));
++    return videoExts.includes(ext);
++  });
++
++  if (files.length === 0) {
++    die('No video files found in directory');
++  }
++
++  info(`Found ${files.length} video file(s)`);
++  console.log(`📁 Output: ${outDir}\n`);
++
++  let converted = 0;
++  let skipped = 0;
++  let errors = 0;
++
++  for (let i = 0; i < files.length; i++) {
++    const filename = files[i];
++    const inputPath = join(inputDir, filename);
++    const outputPath = join(outDir, filename);
++
++    console.log(`[${i + 1}/${files.length}] ${filename}`);
++
++    if (existsSync(outputPath)) {
++      console.log('  ⏭️  Already exists, skipping');
++      skipped++;
++      continue;
++    }
++
++    try {
++      await runFfmpeg(inputPath, outputPath, lutPath);
++      console.log('  ✅ Done');
++      converted++;
++    } catch (err) {
++      console.log(`  ❌ Error: ${err.message}`);
++      errors++;
++    }
++  }
++
++  console.log('\n' + '='.repeat(40));
++  console.log(`✅ Converted: ${converted}`);
++  console.log(`⏭️  Skipped: ${skipped}`);
++  if (errors > 0) console.log(`❌ Errors: ${errors}`);
++  console.log('='.repeat(40));
++}
++
 +// ─── Main ────────────────────────────────────────────────────────────
 +
 +const { command, positional, flags } = parseArgs(process.argv);
@@ -944,6 +1361,9 @@ index 0000000..f7c6baa
 +    break;
 +  case 'info':
 +    await cmdInfo(positional, flags);
++    break;
++  case 'convert':
++    await cmdConvert(positional, flags);
 +    break;
 +  default:
 +    die(`Unknown command: ${command}. Run "dji-osmo --help" for usage.`);
