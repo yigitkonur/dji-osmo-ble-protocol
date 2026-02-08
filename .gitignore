@@ -14,3 +14,10 @@ Thumbs.db
 # Build
 dist/
 *.js.map
+
+# Cloned reference repos (use git clone separately if needed)
+reference/reverse-engineering-dji/
+reference/dji_rev/
+
+# Experiment logs (large debug artifacts)
+experiments/logs/*.log

@@ -68,7 +68,6 @@ export const GIMBAL_MODE = {
 // ─── BLE UUIDs ───────────────────────────────────────────────────────────────
 export const BLE = {
   SERVICE_UUID: 'fff0',
-  CHAR_FFF3: 'fff3',
   CHAR_FFF4: 'fff4', // Pairing trigger + DUML notifications
   CHAR_FFF5: 'fff5', // DUML command writes (writeWithoutResponse)
 };

@@ -1,7 +1,7 @@
 {
   "name": "dji-osmo-ble-protocol",
   "version": "1.0.0",
-  "description": "> **Successfully achieved**: Full BLE pairing → WiFi configuration → RTMP livestream initiation on a DJI Osmo Pocket 3, entirely from the command line on macOS, without the DJI Mimo app.",
+  "description": "DJI Osmo Pocket 3 BLE protocol library — DUML messaging, pairing, and gimbal control",
   "main": "src/connection.mjs",
   "exports": {
     ".": "./src/connection.mjs",

@@ -1,8 +1,8 @@
 # Experiment Logs
 
-Each log file is a complete debug output from a test run of the node-osmo library against a DJI Osmo Pocket 3. The logs are ordered chronologically and annotated with what was being tested.
+Debug output from test runs of the node-osmo library against a DJI Osmo Pocket 3. Logs are gitignored (1.3MB of raw debug output). Regenerate by running the tool with `DEBUG=*`.
 
-## Log Index
+## Log Index (historical)
 
 ### `01-initial-bytebuf-fix.log`
 **What**: First run after fixing ByteBuf bugs #1 and #2 (pool offset + byteLength)
