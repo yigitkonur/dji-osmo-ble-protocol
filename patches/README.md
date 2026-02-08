@@ -2,7 +2,7 @@
 
 ## `node-osmo-all-fixes.patch`
 
-This patch contains all 7 bug fixes required to make [node-osmo](https://github.com/nickneos/node-osmo) work with the DJI Osmo Pocket 3.
+This patch contains all 7 bug fixes required to make [node-osmo](https://github.com/datagutt/node-osmo) work with the DJI Osmo Pocket 3.
 
 ### What's Fixed
 
@@ -26,7 +26,7 @@ Plus structural improvements:
 
 ```bash
 # Clone and enter node-osmo
-git clone https://github.com/nickneos/node-osmo
+git clone https://github.com/datagutt/node-osmo
 cd node-osmo
 
 # Apply the patch

@@ -8,7 +8,7 @@ A complete documentation of reverse engineering the DJI Osmo Pocket 3's Bluetoot
 
 - **[PROTOCOL.md](PROTOCOL.md)** — Complete DUML-over-BLE protocol specification
 - **[JOURNEY.md](JOURNEY.md)** — The full reverse engineering narrative with every wrong turn and breakthrough
-- **[patches/](patches/)** — Working patches for the [node-osmo](https://github.com/nickneos/node-osmo) library
+- **[patches/](patches/)** — Working patches for the [node-osmo](https://github.com/datagutt/node-osmo) library
 - **[experiments/](experiments/)** — Annotated debug logs from 14 iterative experiments
 - **[analysis/](analysis/)** — Deep-dive analysis of each bug discovered
 - **[reference/](reference/)** — Wireshark dissector and protocol notes from [xaionaro's research](https://github.com/xaionaro/reverse-engineering-dji)
@@ -40,7 +40,7 @@ node examples/connect-to-device.js <deviceId> 3 <ssid> <password> 'rtmp://server
 
 ```bash
 # Clone and patch node-osmo
-git clone https://github.com/nickneos/node-osmo
+git clone https://github.com/datagutt/node-osmo
 cd node-osmo
 git apply ../dji-osmo-ble-protocol/patches/node-osmo-all-fixes.patch
 pnpm install
@@ -197,7 +197,7 @@ dji-osmo-ble-protocol/
 ## Acknowledgments
 
 - [xaionaro/reverse-engineering-dji](https://github.com/xaionaro/reverse-engineering-dji) — Wireshark captures and dissector that provided the critical clue about fff5 being the write characteristic
-- [nickneos/node-osmo](https://github.com/nickneos/node-osmo) — Original Node.js library that provided the foundation
+- [datagutt/node-osmo](https://github.com/datagutt/node-osmo) — Original Node.js library that provided the foundation
 - [djictl](https://github.com/xaionaro/djictl) — Go reference implementation of the DUML protocol
 
 ## License

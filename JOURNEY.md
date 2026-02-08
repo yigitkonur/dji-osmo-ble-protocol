@@ -4,7 +4,7 @@
 
 ## Background
 
-The goal was simple: make a DJI Osmo Pocket 3 camera start an RTMP livestream, controlled entirely via Bluetooth Low Energy from a Mac, without the DJI Mimo app. The [node-osmo](https://github.com/nickneos/node-osmo) library existed as a starting point, but it didn't work with the Pocket 3.
+The goal was simple: make a DJI Osmo Pocket 3 camera start an RTMP livestream, controlled entirely via Bluetooth Low Energy from a Mac, without the DJI Mimo app. The [node-osmo](https://github.com/datagutt/node-osmo) library existed as a starting point, but it didn't work with the Pocket 3.
 
 What followed was a multi-day debugging odyssey that uncovered 7 independent bugs — each silently preventing the protocol from functioning, and each masking the others. At every stage, fixing one bug revealed the next, like peeling layers of an onion where each layer looks like the core.
 
