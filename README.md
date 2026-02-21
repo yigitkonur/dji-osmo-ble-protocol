@@ -25,8 +25,8 @@ talks directly to the Osmo Pocket 3 over BLE using DJI's proprietary DUML binary
 ## install
 
 ```bash
-git clone https://github.com/yigitkonur/dji-osmo-ble-protocol.git
-cd dji-osmo-ble-protocol
+git clone https://github.com/yigitkonur/lib-osmo-ble.git
+cd lib-osmo-ble
 npm install
 ```
 
@@ -86,7 +86,7 @@ node tools/verify-crc.mjs 552204ea020780924007450f303031373439333139323836313032
 ### as a library
 
 ```javascript
-import { OsmoConnection } from 'dji-osmo-ble-protocol';
+import { OsmoConnection } from 'lib-osmo-ble';
 
 const conn = new OsmoConnection({ deviceId: '<id>', pin: 'love' });
 await conn.connect();
@@ -102,9 +102,9 @@ conn.gimbal.setSpeed(10, 0, 0);  // pitch at 10 deg/s
 modular exports available:
 
 ```javascript
-import { buildMessage, parseMessage } from 'dji-osmo-ble-protocol/protocol';
-import { BleTransport } from 'dji-osmo-ble-protocol/transport';
-import { GimbalController } from 'dji-osmo-ble-protocol/gimbal';
+import { buildMessage, parseMessage } from 'lib-osmo-ble/protocol';
+import { BleTransport } from 'lib-osmo-ble/transport';
+import { GimbalController } from 'lib-osmo-ble/gimbal';
 ```
 
 ## CLI flags
@@ -161,7 +161,7 @@ includes a `git format-patch` fixing 7 bugs in the [datagutt/node-osmo](https://
 
 ```bash
 cd node-osmo
-git am ../dji-osmo-ble-protocol/patches/node-osmo-all-fixes.patch
+git am ../lib-osmo-ble/patches/node-osmo-all-fixes.patch
 ```
 
 the biggest bug: `ByteBuf extends DataView` initialized `#byteOffset` to the Node.js Buffer pool offset (~4096) instead of 0, causing every byte read to hit the wrong position. all messages decoded to type `1794` (0x0702). details in `analysis/bytebuf-node-buffer-pool.md`.
